@@ -88,4 +88,94 @@ const loginController = async (req, res) => {
   }
 };
 
-module.exports = { registerController, loginController };
+// update-user
+
+const UpdateUserController = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Check if the user exists
+    const user = await Usermodels.findOne({ email });
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Validate password length
+    if (password && password.length < 6) {
+      return res.status(400).send({
+        success: false,
+        message: "Password should be at least 6 characters long",
+      });
+    }
+
+    // Hash the password if provided
+    const hashedPassword = password
+      ? await hashPassword(password)
+      : user.password;
+
+    // Update the user information
+    const updatedUser = await Usermodels.findOneAndUpdate(
+      { email },
+      { name: name || user.name, password: hashedPassword },
+      { new: true }
+    );
+
+    // Ensure the password is not returned in the response
+    updatedUser.password = undefined;
+
+    return res.status(200).send({
+      success: true,
+      message: "Updated successfully!",
+      user: updatedUser,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: "An error occurred while updating the user",
+      error: error.message,
+    });
+  }
+};
+
+// user getApi
+const GetUser = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).send({
+        Success: false,
+        message: "plese pass the Email",
+      });
+    }
+    console.log("hhh");
+    const user = await Usermodels.findOne({ email });
+    if (!user) {
+      return res.status(400).send({
+        Success: false,
+        message: "Email not Found !",
+      });
+    }
+    res.status(200).send({
+      Success: true,
+      message: " Successfully ! ",
+      user,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      Success: false,
+      message: "Api have Some Error !",
+      error: error,
+    });
+  }
+};
+
+module.exports = {
+  registerController,
+  loginController,
+  UpdateUserController,
+  GetUser,
+};
