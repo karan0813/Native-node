@@ -1,7 +1,14 @@
 const JWT = require("jsonwebtoken");
-
+var { expressjwt: jwt } = require("express-jwt");
 const { hashPassword, verifyPassword } = require("../Helpers/authHelper");
 const Usermodels = require("../Models/Usermodels");
+
+// express Middleware
+
+const compairJWT = jwt({
+  secret: process.env.JWT_SECRET,
+  algorithms: ["HS256"],
+});
 
 // register
 const registerController = async (req, res) => {
@@ -148,7 +155,7 @@ const GetUser = async (req, res) => {
     if (!email) {
       return res.status(400).send({
         Success: false,
-        message: "plese pass the Email",
+        message: "Please pass the Email",
       });
     }
     console.log("hhh");
@@ -178,4 +185,5 @@ module.exports = {
   loginController,
   UpdateUserController,
   GetUser,
+  compairJWT,
 };
