@@ -110,4 +110,46 @@ const GetTodoControler = async (req, res) => {
   }
 };
 
-module.exports = { AddTodoControler, editTodoControler, GetTodoControler };
+// deleteTodo
+const deleteTodoController = async (req, res) => {
+  try {
+    const { TodoID } = req.query;
+
+    if (!TodoID) {
+      return res.status(400).send({
+        success: false,
+        message: "Request body is missing or invalid.",
+      });
+    }
+
+    // Check if Todo exists
+    const TodoPresent = await Todomodels.findOne({ _id: TodoID });
+    if (!TodoPresent) {
+      return res.status(404).send({
+        success: false,
+        message: "Todo not found",
+      });
+    }
+
+    // Delete Todo
+    await Todomodels.deleteOne({ _id: TodoID });
+
+    return res.status(200).send({
+      success: true,
+      message: "Todo deleted successfully!",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: "API encountered an error.",
+      error: error,
+    });
+  }
+};
+
+module.exports = {
+  AddTodoControler,
+  editTodoControler,
+  GetTodoControler,
+  deleteTodoController,
+};
